@@ -1,0 +1,54 @@
+version : '3.0'
+
+services :
+ my_db :
+      image : mysql
+      command : mysqld --default-authentication-plugin=mysql_native_password
+      restart : always
+      environment :
+        MYSQL_ROOT_PASSWORD : "123456"
+      volumes:
+       - "/docker/mysql/data:/var/lib/mysql"
+      ports:
+       - "3306:3306"
+      networks:
+       - default
+      depends_on :
+       - my_nginx 
+      deploy:
+        placement:
+          constraints: [node.role == manager]
+ 
+ my_php_fpm :
+     image : php:v0.3
+     restart : always 
+     ports :
+      - "9000:9000"
+     networks :
+      - default
+     container_name: my_php_fpm
+     volumes :
+      - "/data/www:/var/www/html"
+     deploy:
+      mode: replicated
+      replicas: 2
+     
+ my_nginx : 
+    image : nginx:v2.3
+    ports : 
+     - "80:80"
+    environment:
+     php: my_php_fpm
+    networks :
+     - default
+    volumes : 
+     - "/data/www:/usr/share/nginx/html"
+    deploy:
+     mode: replicated
+     replicas: 2
+     restart_policy:
+       condition: on-failure
+networks:
+  default:
+    external:
+      name: my-overlay

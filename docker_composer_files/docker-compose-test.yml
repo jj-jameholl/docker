@@ -1,0 +1,19 @@
+version : '3.0'
+
+services :
+
+ my_nginx : 
+    image : nginx:v2.1
+    restart : always
+    ports : 
+     - "80:80"
+    networks :
+     - overlay
+    volumes : 
+     - "/data/www:/usr/share/nginx/html"
+    deploy:
+     mode: replicated
+     replicas: 2
+
+networks :
+   overlay:
